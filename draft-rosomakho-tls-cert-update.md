@@ -59,7 +59,7 @@ To deliver the updated certificate or attestation evidence, a new TLS handshake 
 
 Because authenticator requests are single-use and may not be reused in subsequent authenticator constructions, a second post-handshake message is defined: `CertificateUpdateRequest`. This message allows an endpoint to provide a new authenticator request for future use after processing a `CertificateUpdate`.
 
-This approach allows TLS connections to remain valid across certificate updates and re-attestation cycles without requiring session termination. It is compatible with TLS 1.3 and {{?QUIC=RFC9000}}, and can be used regardless of the application protocol encapsulated within the connection.
+This approach allows TLS connections to remain valid across certificate updates and re-attestation without requiring session termination. It is compatible with TLS 1.3 and {{?QUIC=RFC9000}}, and can be used regardless of the application protocol encapsulated within the connection.
 
 The certificate update mechanism in the document is deliberately constrained to preserve the authentication and authorization context of the connection. The updated certificate must retain the same subject, attributes, and issuing certificate authority as the original, with the only permitted difference being the validity period. This ensures that the peer identity remains unchanged and that application-layer authorization decisions based on the original certificate continue to hold after the update. By limiting the scope of updates in this way, the mechanism provides secure and seamless certificate refresh without altering the security properties of the TLS session.
 
@@ -181,6 +181,8 @@ The Exported Authenticator carried in a `CertificateUpdate` message MUST meet th
 - The issuer of the updated certificate MUST be the same as the issuer of the original certificate.
 - The `SignatureScheme` used in the `CertificateVerify` message of the Exported Authenticator MUST be the same as the one used in the sender's original handshake authentication.
 - The certificate provided in the `CertificateUpdate` message MUST NOT have been used previously by the sender during the current TLS session.
+
+These constraints ensure that the authenticator represents the same logical identity and cryptographic profile as the original authentication, while ensuring freshness and preventing redundant certificate reuse.
 
 When the `CertificateUpdate` message is used to perform re-attestation, as negotiated during the handshake per {{draft-fossati-seat-early-attestation}}, the certificate extensions carry attestation Evidence or Attestation Results. Validation of the attestation payload is governed by {{draft-fossati-seat-early-attestation}}. All other requirements above apply equally to the re-attestation case.
 
